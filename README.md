@@ -23,7 +23,7 @@
 - Età media della rosa
 - Classifiche finali
 
-## 🧪 Tecnologieusate
+## 🧪 Tecnologie usate
 - Google sheets
 - Linguaggio R 
 - Tableau Public
