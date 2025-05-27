@@ -5,12 +5,10 @@
 
 ## 📁 Contenuto del repository
 
-- `juventus_case_study.Rmd`: report completo con codice R, grafici e conclusioni
-- `data/juve_clean.csv`: dataset pulito usato per l’analisi
-- `output/`: grafici PNG esportati
-- `tableau/link_tableau.txt`: link alla dashboard interattiva
-- `script/tidy_script.R`: script per elaborazione dati in R
-
+- `juve_dashboard_v2.png`: dashboard creata con R
+- `juve_clean.csv`: dataset pulito creato dallo script R, usato poi per l’analisi
+- `juventusscript.R`: script per elaborazione dati in R e creazione dashboard
+- `juventus_report.Rmd`: report di tutto ciò è stato fatto
 ## 🔗 Tableau Dashboard
 
 [Visualizza qui su Tableau Public](https://public.tableau.com/app/profile/manuel.lomartire/viz/Juventus2011-2025/Dashboard2#1)
