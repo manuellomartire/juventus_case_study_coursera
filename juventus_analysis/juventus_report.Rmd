@@ -1,0 +1,98 @@
+---
+title: "juventus_report"
+author: "Manuel Lomartire"
+date: "2025-05-27"
+output: html_document
+---
+
+# Ask: Obiettivo dell'analisi
+
+L'obiettivo è analizzare cosa è successo alla Juventus dopo il ciclo di 9 scudetti consecutivi (2011–2020), focalizzandosi sulle performance sportive, gli investimenti economici, la struttura della rosa.
+
+# Prepare: Raccolta dati
+
+I dati sono stati raccolti manualmente da fonti pubbliche e inseriti in un file csv 'juventus.csv':
+
+* Wikipedia: classifica finale, punti, gol fatti e subiti
+
+* Transfermarkt: valore rosa, età media, spese e ricavi di calciomercato
+
+Successivamente è stato creato uno script in R per leggere questi dati per poi pulirli e processarli nella fase successiva
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(scales)
+library(ggtext)
+library(ggthemes)
+library(patchwork)
+library(here)
+
+raw <- read_csv(here("juventus.csv"),
+                col_types = cols(.default = "c")) 
+```
+
+Per evitare qualsiasi errore tutte le colonne vengolo lette come character tramite questa istruzione "col_types = cols(.default = "c"))"
+
+# Process: Pulizia e trasformazione
+
+Tramite lo script che andremo ad illustrare di seguito è stata creata una tabella pulita con le stagioni e con Punti, gol_fatti, ecc...
+```{r}
+view(raw)
+```
+
+```{r}
+tidy <- raw %>% 
+  rename(variabile = `Colonna 1`) %>% #la colonna 1 rappresenta gol_fatti, punti ecc...
+  filter(variabile != "Colonna 1") %>% # filtra via tutto ciò che non è colonna 1
+  pivot_longer(-variabile,
+               names_to = "stagione",
+               values_to = "valore")  # abbiamo trasformato da tabella orizzontale a verticale e abbiamo deselezionato ->(-variabile)
+  
+  view(tidy)
+  
+  #adesso la trasformiamo in una tabella orizzontale.
+  tidy <- tidy %>%  
+  pivot_wider(names_from = variabile, values_from = valore) %>% # fa l'opposto di pivot longer
+  clean_names() %>% #funzione per fare pulizia
+  # modifichiamo la colonna stagione, ed estraiamo in manieara ordinata e unica le stagioni
+  mutate(
+    stagione = factor(stagione, levels = unique(stagione), ordered = TRUE)
+  ) %>% # infine Convertire tutte le colonne (tranne "stagione") da carattere a numero, gestendo correttamente le virgole come separatore decimale, e i punti come separatore delle migliaia.
+    #parse_number funzione lambda che mette il . dove sono le virgole
+  mutate(across(-stagione, ~ parse_number(.x, locale = locale(decimal_mark = ",", grouping_mark = "."))))
+view(tidy)
+```
+
+# Analyze
+
+In questa fase ci siamo concentrati nell'analisi e filtraggio dati dai valori nulli (anche se non ci dovrebbero essere):
+
+```{r}
+tidy_no_na <- tidy %>% filter(!is.na(punti))
+```
+
+Abbiamo creato una colonna "era" che distingue la stagione <=2019, ovvero dei 9 scudetti vinti, da quella dei giorni d'oggi (chiamata Post-2020). 
+```{r}
+tidy_no_na <- tidy_no_na %>% 
+  mutate(era = if_else(as.numeric(substr(stagione, 1, 4)) <= 2019, #prendiamo solo il primo anno delle stagioni quindi 2019/2020 restituisce 2019
+                       "Scudetti", "Post-2020"))
+view(tidy_no_na)
+```
+
+# Share 
+
+La condivisione dei risultati è stata effettuata attraverso più canali:
+
+* Dashboard interattiva in Tableau: 'https://public.tableau.com/app/profile/manuel.lomartire/viz/Juventus2011-2025/Dashboard2#1'
+
+* Github è presente l'intero repository con tutti i file dentro dove potete vedere l'intero operato: 'https://github.com/manuellomartire/juventus_case_study_coursera'
+
+# Act
+
+L’obiettivo dell’analisi è stato comprendere l’evoluzione della Juventus, dal ciclo vincente 2011–2020 fino alla fase post-2020, sotto il profilo sportivo e finanziario.
+Dopo il 2020 si osserva un netto calo delle performance, legato anche all’impatto della significativa perdita economica registrata nella stagione 2018/2019. Inoltre, l’età media della rosa è progressivamente diminuita, suggerendo due possibili strategie future:
+
+un percorso di ricostruzione graduale basato su giocatori giovani e di prospettiva, con l’obiettivo di avviare un nuovo ciclo vincente;
+
+oppure se si vuole un approccio più immediato bisogna puntare su profili esperti per tornare rapidamente ai vertici.
